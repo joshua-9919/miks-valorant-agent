@@ -6,10 +6,10 @@ import AgentCard from '@/components/AgentCard';
 import { Search, Filter } from 'lucide-react';
 
 const roleMap: Record<string, string> = {
-  'Duelist': '决斗者',
-  'Initiator': '先锋',
-  'Controller': '控场者',
-  'Sentinel': '哨卫',
+  'Duelist': 'Duelist',
+  'Initiator': 'Initiator',
+  'Controller': 'Controller',
+  'Sentinel': 'Sentinel',
 };
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState<string>('全部');
 
   useEffect(() => {
-    fetch('https://valorant-api.com/v1/agents?language=zh-CN')
+    fetch('https://valorant-api.com/v1/agents')
       .then(res => res.json())
       .then(data => {
         if (data.status === 200) {
@@ -37,12 +37,12 @@ export default function Home() {
     return matchesSearch && matchesRole;
   });
 
-  const roles = ['全部', '决斗者', '先锋', '控场者', '哨卫'];
+  const roles = ['All', 'Duelist', 'Initiator', 'Controller', 'Sentinel'];
 
   if (loading) {
     return (
       <div className="min-h-screen bg-valorant-dark flex items-center justify-center">
-        <div className="text-valorant-red text-2xl">加载中...</div>
+        <div className="text-valorant-red text-2xl">Loading...</div>
       </div>
     );
   }
@@ -55,14 +55,14 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-white mb-4">
             🎮 Miks Valorant Agent
           </h1>
-          <p className="text-white/80 mb-4">Valorant 特工信息查询站</p>
+          <p className="text-white/80 mb-4">Valorant Agent Database</p>
           
           {/* Search */}
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="搜索特工..."
+              placeholder="Search agents..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50"
@@ -98,7 +98,7 @@ export default function Home() {
         
         {filteredAgents.length === 0 && (
           <div className="text-center text-gray-400 py-12">
-            未找到匹配的特工
+            No agents found
           </div>
         )}
       </div>

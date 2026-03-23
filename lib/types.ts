@@ -4,6 +4,8 @@ export interface Agent {
   description: string;
   developerName: string;
   displayIcon: string;
+  fullPortrait: string;
+  isPlayable: boolean;
   role: Role;
   abilities: Ability[];
 }

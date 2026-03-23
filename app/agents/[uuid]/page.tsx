@@ -14,10 +14,10 @@ const roleColors: Record<string, string> = {
 };
 
 const roleMap: Record<string, string> = {
-  'Duelist': '决斗者',
-  'Initiator': '先锋',
-  'Controller': '控场者',
-  'Sentinel': '哨卫',
+  'Duelist': 'Duelist',
+  'Initiator': 'Initiator',
+  'Controller': 'Controller',
+  'Sentinel': 'Sentinel',
 };
 
 export default function AgentDetail() {
@@ -28,7 +28,7 @@ export default function AgentDetail() {
 
   useEffect(() => {
     if (params.uuid) {
-      fetch(`https://valorant-api.com/v1/agents/${params.uuid}?language=zh-CN`)
+      fetch(`https://valorant-api.com/v1/agents/${params.uuid}`)
         .then(res => res.json())
         .then(data => {
           if (data.status === 200) {
@@ -43,7 +43,7 @@ export default function AgentDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-valorant-dark flex items-center justify-center">
-        <div className="text-valorant-red text-2xl">加载中...</div>
+        <div className="text-valorant-red text-2xl">Loading...</div>
       </div>
     );
   }
@@ -51,7 +51,7 @@ export default function AgentDetail() {
   if (!agent) {
     return (
       <div className="min-h-screen bg-valorant-dark flex items-center justify-center">
-        <div className="text-white text-2xl">特工未找到</div>
+        <div className="text-white text-2xl">Agent not found</div>
       </div>
     );
   }
@@ -65,7 +65,7 @@ export default function AgentDetail() {
           className="flex items-center gap-2 text-white hover:text-valorant-red transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          返回
+          Back
         </button>
       </div>
 
@@ -77,33 +77,37 @@ export default function AgentDetail() {
           className="bg-valorant-dark/50 rounded-lg overflow-hidden border border-valorant-red/30"
         >
           {/* Hero Section */}
-          <div className="relative h-64 md:h-96">
-            <img
-              src={agent.fullPortrait || agent.displayIcon}
-              alt={agent.displayName}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-valorant-dark to-transparent" />
-            <div className="absolute bottom-0 left-0 p-6">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                {agent.displayName}
-              </h1>
-              <div className={`inline-block px-3 py-1 rounded text-sm text-white ${
-                roleColors[agent.role.displayName] || 'bg-gray-500'
-              }`}>
-                {roleMap[agent.role.displayName] || agent.role.displayName}
+          <div className="relative bg-gradient-to-b from-valorant-red/20 to-valorant-dark">
+            <div className="flex flex-col md:flex-row items-center p-6 gap-6">
+              {/* Agent Portrait */}
+              <div className="w-full md:w-1/2 flex justify-center">
+                <img
+                  src={agent.fullPortrait || agent.displayIcon}
+                  alt={agent.displayName}
+                  className="w-full max-w-md h-auto object-contain"
+                />
+              </div>
+              
+              {/* Agent Info */}
+              <div className="w-full md:w-1/2 text-center md:text-left">
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                  {agent.displayName}
+                </h1>
+                <div className={`inline-block px-3 py-1 rounded text-sm text-white mb-4 ${
+                  roleColors[agent.role.displayName] || 'bg-gray-500'
+                }`}>
+                  {roleMap[agent.role.displayName] || agent.role.displayName}
+                </div>
+                <p className="text-gray-300 text-sm md:text-base">
+                  {agent.description}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Description */}
+          {/* Abilities */}
           <div className="p-6">
-            <p className="text-gray-300 text-lg mb-6">
-              {agent.description}
-            </p>
-
-            {/* Abilities */}
-            <h2 className="text-2xl font-bold text-white mb-4">技能</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Abilities</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {agent.abilities.map((ability, index) => (
                 <AbilityCard key={index} ability={ability} index={index} />
@@ -117,41 +121,71 @@ export default function AgentDetail() {
 }
 
 function AbilityCard({ ability, index }: { ability: Ability; index: number }) {
-  const slotColors: Record<string, string> = {
-    'C': 'bg-blue-500',
-    'Q': 'bg-green-500',
-    'E': 'bg-yellow-500',
-    'X': 'bg-red-500',
+  // Map API slot names to key hints and colors
+  const slotKeyMap: Record<string, string> = {
+    'Ability1': 'C',
+    'Ability2': 'Q',
+    'Grenade': 'E',
+    'Ultimate': 'X',
   };
+
+  const slotColors: Record<string, string> = {
+    'Ability1': 'from-blue-500 to-blue-700',
+    'Ability2': 'from-green-500 to-green-700',
+    'Grenade': 'from-yellow-500 to-yellow-700',
+    'Ultimate': 'from-red-500 to-red-700',
+  };
+
+  const slotBorderColors: Record<string, string> = {
+    'Ability1': 'border-blue-500/50',
+    'Ability2': 'border-green-500/50',
+    'Grenade': 'border-yellow-500/50',
+    'Ultimate': 'border-red-500/50',
+  };
+
+  const keyHint = slotKeyMap[ability.slot] || ability.slot.charAt(0);
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-valorant-dark/50 rounded-lg p-4 border border-valorant-red/20"
+      className={`bg-valorant-dark/80 rounded-xl p-5 border ${slotBorderColors[ability.slot] || 'border-gray-500/30'} hover:border-valorant-red transition-all duration-300`}
     >
-      <div className="flex items-start gap-4">
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-xl ${
-          slotColors[ability.slot] || 'bg-gray-500'
-        }`}>
-          {ability.slot}
+      <div className="flex items-center gap-3 mb-3">
+        {/* Skill Icon */}
+        <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${slotColors[ability.slot] || 'from-gray-500 to-gray-700'} flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0`}>
+          {keyHint}
         </div>
-        <div className="flex-1">
-          <h3 className="text-white font-bold text-lg mb-1">
+        
+        {/* Skill Name */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-white font-bold text-base truncate">
             {ability.displayName}
           </h3>
-          <p className="text-gray-400 text-sm">
-            {ability.description}
-          </p>
         </div>
       </div>
+      
+      {/* Skill Description */}
+      <p className="text-gray-400 text-sm leading-relaxed mb-4">
+        {ability.description}
+      </p>
+      
+      {/* Skill Image */}
       {ability.displayIcon && (
-        <img
-          src={ability.displayIcon}
-          alt={ability.displayName}
-          className="mt-3 w-full h-24 object-cover rounded-lg"
-        />
+        <div className="relative group overflow-hidden rounded-xl bg-valorant-dark/50 border border-white/10 group-hover:border-valorant-red/50 transition-all duration-300">
+          {/* 技能图片 */}
+          <div className="p-3">
+            <img
+              src={ability.displayIcon}
+              alt={ability.displayName}
+              className="w-full h-28 object-contain"
+            />
+          </div>
+          
+          {/* 悬停光效 */}
+          <div className="absolute inset-0 bg-valorant-red opacity-0 group-hover:opacity-5 transition-opacity rounded-xl" />
+        </div>
       )}
     </motion.div>
   );

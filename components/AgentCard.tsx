@@ -31,11 +31,11 @@ export default function AgentCard({ agent }: AgentCardProps) {
         className="bg-valorant-dark/50 rounded-lg overflow-hidden border border-valorant-red/30 hover:border-valorant-red transition-colors cursor-pointer"
       >
         {/* Agent Image */}
-        <div className="aspect-square relative overflow-hidden">
+        <div className="aspect-square relative overflow-hidden bg-valorant-dark">
           <img
             src={agent.displayIcon || agent.fullPortrait}
             alt={agent.displayName}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain p-2"
           />
         </div>
         
